@@ -110,7 +110,7 @@ class AWSResource(Resource):
         if hasattr(self.Meta, 'dimension') and self.Meta.dimension:
             self._cloudwatch = skew.awsclient.get_awsclient(
                 'cloudwatch', self._client.region_name,
-                self._client.account_id)
+                self._client.account_id, client=self._client)
         self._metrics = None
         self._name = None
         self._date = None

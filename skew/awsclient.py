@@ -36,6 +36,9 @@ def json_encoder(obj):
 class AWSClient(object):
 
     def __init__(self, service_name, region_name, account_id, **kwargs):
+       
+        self.aws_access_key_id = (kwargs.get('aws_access_key_id'))
+        self.aws_secret_access_key = (kwargs.get('aws_secret_access_key'))
         self._config = get_config()
         self._service_name = service_name
         self._region_name = region_name
@@ -69,20 +72,27 @@ class AWSClient(object):
     def profile(self):
         return self._profile
 
+
     def _create_client(self):
         if self.aws_creds:
             session = boto3.Session(**self.aws_creds)
+            return session.client(self.service_name,
+                    region_name=self.region_name if self.region_name else None)
+        elif self.aws_access_key_id != None and self.aws_secret_access_key != None:
+            return boto3.client(self.service_name,aws_access_key_id= self.aws_access_key_id,
+                    region_name= self._region_name,
+                    aws_secret_access_key=self.aws_secret_access_key)
         else:
             session = boto3.Session(
                 profile_name=self.profile)
-        if self.placebo and self.placebo_dir:
-            pill = self.placebo.attach(session, self.placebo_dir)
-            if self.placebo_mode == 'record':
-                pill.record()
-            elif self.placebo_mode == 'playback':
-                pill.playback()
-        return session.client(self.service_name,
-                              region_name=self.region_name if self.region_name else None)
+            if self.placebo and self.placebo_dir:
+                pill = self.placebo.attach(session, self.placebo_dir)
+                if self.placebo_mode == 'record':
+                    pill.record()
+                elif self.placebo_mode == 'playback':
+                    pill.playback()
+            return session.client(self.service_name,
+                                region_name=self.region_name if self.region_name else None)
 
     def call(self, op_name, query=None, **kwargs):
         """
@@ -144,4 +154,9 @@ class AWSClient(object):
 def get_awsclient(service_name, region_name, account_id, **kwargs):
     if region_name == '':
         region_name = None
+    client = kwargs.get("client")
+    if client  != None:
+        if (client.aws_access_key_id != None and client.aws_secret_access_key != None):
+            kwargs["aws_access_key_id"] = client.aws_access_key_id
+            kwargs["aws_secret_access_key"] = client.aws_secret_access_key
     return AWSClient(service_name, region_name, account_id, **kwargs)

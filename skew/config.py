@@ -32,7 +32,10 @@ def get_config():
         path = os.path.expanduser(path)
         path = os.path.expandvars(path)
         if not os.path.exists(path):
-            raise ConfigNotFoundError('Unable to find skew config file')
+            return {
+                "accounts": {"dummy":{"profile":"dummy"}}
+            }
+            # raise ConfigNotFoundError('Unable to find skew config file')
         with open(path) as config_file:
             _config = yaml.safe_load(config_file)
     return _config
