@@ -107,7 +107,7 @@ class AWSResource(Resource):
         else:
             self._id = ''
         self._cloudwatch = None
-        if hasattr(self.Meta, 'dimension') and self.Meta.dimension:
+        if hasattr(self.Meta, 'dimension') and self.Meta.dimension and hasattr(self.Meta, 'cloudwatch'):
             self._cloudwatch = skew.awsclient.get_awsclient(
                 'cloudwatch', self._client.region_name,
                 self._client.account_id, client=self._client)
