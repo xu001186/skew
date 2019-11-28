@@ -47,40 +47,13 @@ class Resource(object):
 
 
     @classmethod
-    def comply(cls,resource,client):
+    def comply(cls,resource):
         if resource.tags != None:
             for compliant_tag in cls.TagCompliantMeta.tags:
                 if compliant_tag not in resource.tags:
-                    if hasattr(cls.Meta, 'compliance_action_spec'):
-                        if len(cls.Meta.compliance_action_spec) > 1:
-                            if not isinstance(cls.Meta.compliance_action_spec[1], dict):
-                                LOG.error("%s is not dict type" % cls.Meta.compliance_action_spec[1])
-                                return
-                            import copy
-                            args = copy.deepcopy(cls.Meta.compliance_action_spec[1])
-                            for k,v in args.items():
-                                if isinstance(v,list):
-                                    for item_idx in range(len(v)):
-                                        v[item_idx] = v[item_idx].format(id=resource.id,name=resource.name)
-                                elif isinstance(v,str):
-                                    args[k] = v.format(id=resource.id,name=resource.name)
+                    if hasattr(resource,"shutdown"):
+                       resource.shutdown()
 
-                        trigger_compliant_action = False
-                        if len(cls.Meta.compliance_action_spec) > 2:
-                                exp = cls.Meta.compliance_action_spec[2]
-                                variables = Resource.find_all_variables(exp)
-                                for var_path in variables:
-                                    var_value = jmespath.search(var_path,resource.data)
-                                    if var_value == None:
-                                        var_value = "None"
-                                    exp = exp.replace(var_path , str(var_value)).replace("{","").replace("}","")
-                                if eval(exp):
-                                    trigger_compliant_action = True
-                        else:
-                            trigger_compliant_action = True
-                        
-                        if trigger_compliant_action:
-                            print client.call(cls.Meta.compliance_action_spec[0],**args)
 
     @classmethod
     def enumerate(cls, arn, region, account, resource_id=None, **kwargs):
@@ -130,7 +103,7 @@ class Resource(object):
                 resources.append(cls(client, d, arn.query))
     
         for resource in resources:
-            cls.comply(resource,client)
+            cls.comply(resource)
         return resources
 
     class Meta(object):

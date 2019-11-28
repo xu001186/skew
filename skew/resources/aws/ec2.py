@@ -13,9 +13,20 @@
 # language governing permissions and limitations under the License.
 
 from skew.resources.aws import AWSResource
-
+import jmespath
 
 class Instance(AWSResource):
+
+
+    def shutdown(self):
+        args = {
+            "InstanceIds": [self.id ],
+            "Force": True
+        }
+        count =jmespath.search("State.Name", self.data)
+        if count == "running":
+            return self._client.call("stop_instances",**args)
+        return None
 
     class Meta(object):
         service = 'ec2'
