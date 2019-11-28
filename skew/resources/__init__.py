@@ -24,6 +24,7 @@ ResourceTypes = {
     'aws.cloudfront.distribution': 'aws.cloudfront.Distribution',
     'aws.cloudformation.stack': 'aws.cloudformation.Stack',
     'aws.cloudwatch.alarm': 'aws.cloudwatch.Alarm',
+    'aws.events.rule': 'aws.cloudwatch.Rule',
     'aws.logs.log-group': 'aws.cloudwatch.LogGroup',
     'aws.cloudtrail.trail': 'aws.cloudtrail.CloudTrail',
     'aws.dynamodb.table': 'aws.dynamodb.Table',

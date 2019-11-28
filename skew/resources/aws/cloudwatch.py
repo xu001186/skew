@@ -32,6 +32,19 @@ class Alarm(AWSResource):
         date = 'AlarmConfigurationUpdatedTimestamp'
         dimension = None
 
+class Rule(AWSResource):
+
+    class Meta(object):
+        service = 'events'
+        type = 'rule'
+        enum_spec = ('list_rules', 'Rules', None)
+        id = 'Name'
+        filter_name = 'Name'
+        filter_type = 'list'
+        detail_spec = None
+        name = 'Name'
+        date = None
+        dimension = None
 
 class LogGroup(AWSResource):
 
@@ -39,6 +52,7 @@ class LogGroup(AWSResource):
         service = 'logs'
         type = 'log-group'
         enum_spec = ('describe_log_groups', 'logGroups[]', None)
+        attr_required = False
         attr_spec = [
             ('describe_log_streams', 'logGroupName',
                 'logStreams', 'logStreams'),
@@ -66,17 +80,18 @@ class LogGroup(AWSResource):
         self._id = data['logGroupName']
 
         # add addition attribute data
-        for attr in self.Meta.attr_spec:
-            LOG.debug(attr)
-            detail_op, param_name, detail_path, detail_key = attr
-            params = {param_name: self._id}
-            data = self._client.call(detail_op, **params)
-            if not (detail_path is None):
-                data = jmespath.search(detail_path, data)
-            if 'ResponseMetadata' in data:
-                del data['ResponseMetadata']
-            self.data[detail_key] = data
-            LOG.debug(data)
+        if self.Meta.attr_required:
+            for attr in self.Meta.attr_spec:
+                LOG.debug(attr)
+                detail_op, param_name, detail_path, detail_key = attr
+                params = {param_name: self._id}
+                data = self._client.call(detail_op, **params)
+                if not (detail_path is None):
+                    data = jmespath.search(detail_path, data)
+                if 'ResponseMetadata' in data:
+                    del data['ResponseMetadata']
+                self.data[detail_key] = data
+                LOG.debug(data)
 
     @property
     def logGroupName(self):
