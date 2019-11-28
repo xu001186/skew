@@ -79,9 +79,16 @@ class AWSClient(object):
             return session.client(self.service_name,
                     region_name=self.region_name if self.region_name else None)
         elif self.aws_access_key_id != None and self.aws_secret_access_key != None:
-            return boto3.client(self.service_name,aws_access_key_id= self.aws_access_key_id,
+            client = boto3.client(self.service_name,
                     region_name= self._region_name,
+                    aws_access_key_id= self.aws_access_key_id,
                     aws_secret_access_key=self.aws_secret_access_key)
+
+            sts_client = boto3.client("sts", aws_access_key_id= self.aws_access_key_id,
+                    aws_secret_access_key=self.aws_secret_access_key)
+            account_id = sts_client.get_caller_identity()["Account"]
+            self._account_id = account_id
+            return client
         else:
             session = boto3.Session(
                 profile_name=self.profile)
@@ -132,6 +139,7 @@ class AWSClient(object):
             op = getattr(self._client, op_name)
             done = False
             data = {}
+            
             while not done:
                 try:
                     data = op(**kwargs)
@@ -142,10 +150,13 @@ class AWSClient(object):
                         time.sleep(1)
                     elif 'AccessDenied' in str(e):
                         done = True
+                        raise e
                     elif 'NoSuchTagSet' in str(e):
                         done = True
-                except Exception:
+                        raise e
+                except Exception as e:
                     done = True
+                    raise e
         if query:
             data = query.search(data)
         return data
