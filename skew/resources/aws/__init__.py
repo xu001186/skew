@@ -47,6 +47,7 @@ class AWSResource(Resource):
     Each entry in the dictionary we define:
 
     * service - The AWS service in which this resource is defined.
+    * compliance_action_spec - action , action arguments , condition
     * enum_spec - The enumeration configuration.  This is a tuple consisting
       of the name of the operation to call to enumerate the resources,
       a jmespath query that will be run against the result of the operation
@@ -88,6 +89,7 @@ class AWSResource(Resource):
     class Meta(object):
         type = 'awsresource'
 
+
     @classmethod
     def filter(cls, arn, resource_id, data):
         pass
@@ -107,6 +109,7 @@ class AWSResource(Resource):
         else:
             self._id = ''
         self._cloudwatch = None
+        
         if hasattr(self.Meta, 'dimension') and self.Meta.dimension and hasattr(self.Meta, 'cloudwatch'):
             self._cloudwatch = skew.awsclient.get_awsclient(
                 'cloudwatch', self._client.region_name,
