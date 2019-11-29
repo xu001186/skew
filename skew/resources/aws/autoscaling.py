@@ -19,6 +19,25 @@ from skew.resources.aws import AWSResource
 
 class AutoScalingGroup(AWSResource):
 
+
+    def shutdown(self):
+        args = {
+            "AutoScalingGroupName": self.name ,
+        }
+        SuspendedProcesses =jmespath.search("SuspendedProcesses", self.data)
+        shutdown_continue = True
+        processes = []
+        for process in  SuspendedProcesses:
+            if process["ProcessName"] == "Launch":
+                shutdown_continue = False
+            else:
+                processes.append(process["ProcessName"])
+        if shutdown_continue:
+            processes.append("Launch")
+            args["ScalingProcesses"] = processes
+            return self._client.call("suspend_processes",**args)
+        return None
+
     class Meta(object):
         service = 'autoscaling'
         type = 'autoScalingGroup'
