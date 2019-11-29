@@ -13,9 +13,20 @@
 # language governing permissions and limitations under the License.
 
 from skew.resources.aws import AWSResource
-
+import jmespath
 
 class DBInstance(AWSResource):
+
+
+    def shutdown(self):
+        args = {
+            "DBInstanceIdentifier": self.id ,
+            
+        }
+        state =jmespath.search("DBInstanceStatus", self.data)
+        if state == "available":
+            return self._client.call("stop_db_instance",**args)
+        return state
 
     class Meta(object):
         service = 'rds'
