@@ -69,7 +69,8 @@ ResourceTypes = {
     'aws.s3.bucket': 'aws.s3.Bucket',
     'aws.sqs.queue': 'aws.sqs.Queue',
     'aws.sns.subscription': 'aws.sns.Subscription',
-    'aws.sns.topic': 'aws.sns.Topic'
+    'aws.sns.topic': 'aws.sns.Topic',
+    'aws.kms.key' :  'aws.kms.Key'
 }
 
 
