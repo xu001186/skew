@@ -23,8 +23,8 @@ class Instance(AWSResource):
             "InstanceIds": [self.id ],
             "Force": True
         }
-        count =jmespath.search("State.Name", self.data)
-        if count == "running":
+        state =jmespath.search("State.Name", self.data)
+        if state == "running":
             return self._client.call("stop_instances",**args)
         return None
 
